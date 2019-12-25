@@ -14,11 +14,22 @@ $config['managesieve_conn_options'] = [
     ],
 ];
 
-$config['default_port'] = 143;
-
+$config['smtp_server'] = 'mail';
 $config['smtp_port'] = 587;
 $config['smtp_user'] = '%u';
 $config['smtp_pass'] = '%p';
+
+// session lifetime in minutes
+$config['session_lifetime'] = 20160;
+
+$config['default_host'] = array(
+  'mail' => 'Default Server',
+);
+$config['default_port'] = 143;
+
+$config['username_domain'] = array(
+  'mail' => 'schumann.link',
+);
 
 $config['plugins'] = array('carddav', 'managesieve');
 if(getenv('ROUNDCUBE_USER_FILE')) $config['plugins'][] = 'password';
