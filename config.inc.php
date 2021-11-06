@@ -22,14 +22,9 @@ $config['smtp_pass'] = '%p';
 // session lifetime in minutes
 $config['session_lifetime'] = 20160;
 
-$config['default_host'] = array(
-  'mail' => 'Default Server',
-);
+$config['default_host'] = 'mail';
 $config['default_port'] = 143;
 
-$config['username_domain'] = array(
-  'mail' => 'schumann.link',
-);
-
-$config['plugins'] = array('carddav', 'managesieve');
+// plugins added from Dockerfile
+$config['plugins'] = array();
 if(getenv('ROUNDCUBE_USER_FILE')) $config['plugins'][] = 'password';
