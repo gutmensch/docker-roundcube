@@ -33,13 +33,16 @@ RUN mv composer.json-dist composer.json \
     && /usr/local/bin/lessc --clean-css="--s1 --advanced" skins/elastic/styles/embed.less > skins/elastic/styles/embed.min.css \
     && bin/install-jsdeps.sh \
     && bin/jsshrink.sh program/js/publickey.js && bin/jsshrink.sh plugins/managesieve/codemirror/lib/codemirror.js \
-    && rm -f jsdeps.json bin/install-jsdeps.sh *.orig; rm -rf vendor/masterminds/html5/test vendor/pear/*/tests vendor/*/*/.git* vendor/pear/crypt_gpg/tools vendor/pear/console_commandline/docs vendor/pear/mail_mime/scripts vendor/pear/net_ldap2/doc vendor/pear/net_smtp/docs vendor/pear/net_smtp/examples vendor/pear/net_smtp/README.rst vendor/bacon/bacon-qr-code/test temp/js_cache 
+    && rm -f jsdeps.json bin/install-jsdeps.sh *.orig \
+    && rm -rf vendor/masterminds/html5/test vendor/pear/*/tests vendor/*/*/.git* vendor/pear/crypt_gpg/tools vendor/pear/console_commandline/docs vendor/pear/mail_mime/scripts vendor/pear/net_ldap2/doc vendor/pear/net_smtp/docs vendor/pear/net_smtp/examples vendor/pear/net_smtp/README.rst vendor/bacon/bacon-qr-code/test temp/js_cache \
+   && rm -rf tests plugins/*/tests .git* .tx* .ci* .editorconfig* index-test.php Dockerfile Makefile
 
 
 FROM php:latest
 
 COPY --from=builder /var/www /var/www
 
+# for enigma support
 RUN cleaninstall gnupg
 
 COPY plugins-password-config.inc.php plugins/password/config.inc.php
