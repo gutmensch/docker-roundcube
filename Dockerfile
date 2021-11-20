@@ -51,6 +51,9 @@ COPY plugins-primitivenotes-config.inc.php plugins/primitivenotes/config.inc.php
 # Init scripts (volume preparation)
 COPY etc /etc
 
+# replace default logo with berlin logo
+COPY berlin_logo.svg /var/www/skins/elastic/images/logo.svg
+
 # Setup logging
 RUN echo /var/www/logs/errors >> /etc/services.d/logs/stderr
 
