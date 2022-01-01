@@ -1,6 +1,6 @@
-# robbertkl/roundcube
+# docker-roundcube [![Build Status](https://jenkins.bln.space/buildStatus/icon?job=docker-images%2Fdocker-roundcube%2Fmaster)](https://jenkins.bln.space/job/docker-images/job/docker-roundcube/job/master/)
 
-[![](https://badge.imagelayers.io/robbertkl/roundcube:latest.svg)](https://imagelayers.io/?images=robbertkl/roundcube:latest)
+Forked from [robbertkl/roundcube](https://github.com/robbertkl/docker-roundcube) with original author Robbert Klarenbeek, <robbertkl@renbeek.nl>, thank you!
 
 Roundcube Docker container:
 
@@ -32,10 +32,6 @@ docker run --name roundcube -d --volumes-from roundcube_data -p 80:80 robbertkl/
 ## Environment variables
 
 To configure Roundcube, you can use `ROUNDCUBE_` environment variables for all regular configuration option (e.g. `ROUNDCUBE_DEFAULT_HOST`, `ROUNDCUBE_SMTP_SERVER`, etc). Additionally, the password plugin file driver adds a `ROUNDCUBE_USER_FILE` variable to set the path to password file.
-
-## Authors
-
-* Robbert Klarenbeek, <robbertkl@renbeek.nl>
 
 ## License
 

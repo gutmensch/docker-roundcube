@@ -1,6 +1,8 @@
-FROM php:latest AS builder
+FROM registry.n-os.org:5000/php:7.4 AS builder
 
 LABEL maintainer="Robert Schumann <rs@n-os.org>"
+
+ARG ROUNDCUBE_VERSION=1.5
 
 # Change NGINX document root
 ENV DOCUMENT_ROOT=/var/www/public_html
@@ -9,7 +11,7 @@ WORKDIR ${DOCUMENT_ROOT}/..
 RUN cleaninstall node-less unzip file npm
 
 # Install Roundcube + plugins
-RUN VERSION=release-1.5 \
+RUN VERSION=release-${ROUNDCUBE_VERSION} \
     && rm -rf * \
     && git clone --branch ${VERSION} --depth 1 https://github.com/roundcube/roundcubemail.git . \
     && rm -rf .git installer
@@ -38,7 +40,10 @@ RUN mv composer.json-dist composer.json \
    && rm -rf tests plugins/*/tests .git* .tx* .ci* .editorconfig* index-test.php Dockerfile Makefile
 
 
-FROM php:latest
+FROM registry.n-os.org:5000/php:7.4
+
+ENV DOCUMENT_ROOT=/var/www/public_html
+WORKDIR ${DOCUMENT_ROOT}/..
 
 COPY --from=builder /var/www /var/www
 
@@ -48,11 +53,12 @@ RUN cleaninstall gnupg
 COPY plugins-password-config.inc.php plugins/password/config.inc.php
 COPY plugins-password-file.php plugins/password/drivers/file.php
 COPY plugins-primitivenotes-config.inc.php plugins/primitivenotes/config.inc.php
+
 # Init scripts (volume preparation)
-COPY etc /etc
+COPY manifest /
 
 # replace default logo with berlin logo
-COPY berlin_logo.svg /var/www/skins/elastic/images/logo.svg
+COPY berlin_logo.svg skins/elastic/images/logo.svg
 
 # Setup logging
 RUN echo /var/www/logs/errors >> /etc/services.d/logs/stderr
