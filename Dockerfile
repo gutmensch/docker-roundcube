@@ -11,9 +11,9 @@ WORKDIR ${DOCUMENT_ROOT}/..
 RUN cleaninstall node-less unzip file npm
 
 # Install Roundcube + plugins
-RUN bash -c "VERSION=release-${ROUNDCUBE_VERSION%.*} \
+RUN bash -c "export VERSION=release-${ROUNDCUBE_VERSION%.*} \
     && rm -rf * \
-    && git clone --branch ${VERSION} --depth 1 https://github.com/roundcube/roundcubemail.git . \
+    && git clone --branch \${VERSION} --depth 1 https://github.com/roundcube/roundcubemail.git . \
     && rm -rf .git installer"
 
 RUN mv composer.json-dist composer.json \
