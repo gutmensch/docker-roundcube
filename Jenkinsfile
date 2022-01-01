@@ -47,7 +47,7 @@ def pipeline() {
 
     // https://docs.cloudbees.com/docs/admin-resources/latest/plugins/docker-workflow
     stage('build image') {
-        DOCKER_IMAGE_NAME = "${DOCKER_REGISTRY}/${getDockerImage()}:${getRoundcubeDockerTag()}"
+        DOCKER_IMAGE_NAME = "${DOCKER_REGISTRY}/${getDockerImage()}:${getDockerTag()}"
         DOCKER_IMAGE = docker.build(DOCKER_IMAGE_NAME, "--no-cache ${DOCKER_ARGS} .")
     }
 
@@ -111,13 +111,6 @@ String getDockerTag() {
     else {
         return tagId
     }
-}
-
-// special function for roundcube build
-String getRoundcubeDockerTag(appendBuild = false) {
-    def shortHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-    def release = sh(script: "awk '/## Release/{print \$3}' CHANGELOG.md | head -n1", returnStdout: true).trim()
-    return "${release}-git-${shortHash}"
 }
 
 void setBuildStatus(message, state) {

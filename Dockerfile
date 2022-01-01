@@ -2,7 +2,7 @@ FROM registry.n-os.org:5000/php:7.4 AS builder
 
 LABEL maintainer="Robert Schumann <rs@n-os.org>"
 
-ARG ROUNDCUBE_VERSION=1.5
+ARG ROUNDCUBE_VERSION=1.5.2-git
 
 # Change NGINX document root
 ENV DOCUMENT_ROOT=/var/www/public_html
@@ -11,10 +11,10 @@ WORKDIR ${DOCUMENT_ROOT}/..
 RUN cleaninstall node-less unzip file npm
 
 # Install Roundcube + plugins
-RUN VERSION=release-${ROUNDCUBE_VERSION} \
+RUN bash -c "VERSION=release-${ROUNDCUBE_VERSION%.*} \
     && rm -rf * \
     && git clone --branch ${VERSION} --depth 1 https://github.com/roundcube/roundcubemail.git . \
-    && rm -rf .git installer
+    && rm -rf .git installer"
 
 RUN mv composer.json-dist composer.json \
     && composer config secure-http false \
