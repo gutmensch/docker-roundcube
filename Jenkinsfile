@@ -73,7 +73,7 @@ def pipeline() {
     }
 
     stage('delete image') {
-        if (BRANCH_NAME == 'master' || KEEP_BUILD_IMAGE) {
+        if (BRANCH_NAME == 'master' || params.KEEP_BUILD_IMAGE) {
             Utils.markStageSkippedForConditional('delete image')
         }
         else {
