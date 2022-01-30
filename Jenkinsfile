@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat
 
 DOCKER_IMAGE_NAME = ''
 DOCKER_IMAGE      = ''
+DOCKER_BUILD_ARGS = '--squash --no-cache'
 DOCKER_ARGS       = '--network=services_default'
 DOCKER_REGISTRY   = 'registry.n-os.org:5000'
 
@@ -49,7 +50,7 @@ def pipeline() {
     // https://docs.cloudbees.com/docs/admin-resources/latest/plugins/docker-workflow
     stage('build image') {
         DOCKER_IMAGE_NAME = "${DOCKER_REGISTRY}/${getDockerImage()}:${getDockerTag()}"
-        DOCKER_IMAGE = docker.build(DOCKER_IMAGE_NAME, "--no-cache ${DOCKER_ARGS} .")
+        DOCKER_IMAGE = docker.build(DOCKER_IMAGE_NAME, "${DOCKER_BUILD_ARGS} ${DOCKER_ARGS} .")
     }
 
     stage('run tests') {
