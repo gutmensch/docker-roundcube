@@ -1,12 +1,15 @@
-#!/bin/bash
+#!/usr/bin/with-contenv bash
 
-cd /var/www
+echo "Running MySQL database initializations and migrations."
 
-for subdir in db logs temp
-do
-    mkdir -p "${subdir}"
-    chown www-data: "${subdir}"
-done
+export PATH=/var/www/bin:$PATH
 
-touch logs/errors
-chown www-data: logs/errors
+# roundcube
+echo "Initializing MySQL for roundcube."
+initdb.sh --dir /var/www/SQL
+
+# plugins
+while read dir; do
+  echo "Initializing MySQL for ${dir}."
+  initdb.sh --dir $dir
+done < /var/www/.plugin_db_init
