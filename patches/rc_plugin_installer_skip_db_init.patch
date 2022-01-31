@@ -1,5 +1,5 @@
 --- a/vendor/roundcube/plugin-installer/src/Roundcube/Composer/ExtensionInstaller.php	2022-01-30 12:41:58.000000000 +0100
-+++ b/vendor/roundcube/plugin-installer/src/Roundcube/Composer/ExtensionInstaller.php.new	2022-01-30 15:27:59.000000000 +0100
++++ b/vendor/roundcube/plugin-installer/src/Roundcube/Composer/ExtensionInstaller.php.new	2022-01-31 22:26:20.000000000 +0100
 @@ -80,14 +80,23 @@ class ExtensionInstaller extends Library
              // initialize database schema
              if (!empty($extra['roundcube']['sql-dir'])) {
@@ -11,11 +11,11 @@
 -                        \rcmail_utils::db_init($sqldir);
 +                    if (getenv('SKIP_DB_INIT')) {
 +                        $self->io->write("<warn>Skipping database initialization script for $package_name</warn>");
-+			$self->io->write("<warn>Please run on container init: \\rcmail_utils::db_init('$sqldir');</warn>");
-+			// add directory to .db_init for container start
-+			$fp = fopen('/var/www/.plugin_db_init', 'a');
-+			fwrite($fp, $sqldir . "\n");
-+			fclose($fp);
++                        $self->io->write("<warn>Please run on container init: \\rcmail_utils::db_init('$sqldir');</warn>");
++                        // add directory to .plugin_db_init for container start
++                        $fp = fopen('/var/www/.db_init', 'a');
++                        fwrite($fp, $package_name . ":" . $sqldir . "\n");
++                        fclose($fp);
                      }
                      else {
 -                        throw new \Exception("Database initialization failed. Roundcube 1.2.0 or above required.");

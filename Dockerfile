@@ -23,7 +23,9 @@ ENV PATH=/usr/local/bin:/bin:/usr/bin:/var/www/bin STYLES=skins/elastic/styles S
 RUN mv composer.json-dist composer.json \
     && composer config secure-http false \
     # skip db initialization in plugin installer but create log for container start \
-    && touch .plugin_db_init \
+    # as done in patch for plugin-installer \
+    # start with package roundcube to initialize this too \
+    && echo "roundcube:/var/www/SQL" > .db_init \
     && composer require --update-no-dev roundcube/plugin-installer:dev-master \
     && patch -p1 < /var/tmp/rc_plugin_installer_skip_db_init.patch \
     \
@@ -37,6 +39,9 @@ RUN mv composer.json-dist composer.json \
         kolab/calendar \
     && ln -sf ../../vendor plugins/carddav/vendor \
     && composer clear-cache \
+    \
+    # fix buggy mysql init commands if present \
+    && find /var/www -type f -wholename '*mysql*.sql' -exec sed -i 's/REPLACE INTO system /REPLACE INTO `system` /g' {} \; \
     \
     # shrink static assets \
     && npm install -g less uglify-js less-plugin-clean-css csso-cli \
