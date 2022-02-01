@@ -40,8 +40,8 @@ RUN mv composer.json-dist composer.json \
     && ln -sf ../../vendor plugins/carddav/vendor \
     && composer clear-cache \
     \
-    # fix buggy mysql init commands if present \
-    && find /var/www -type f -wholename '*mysql*.sql' -exec sed -i 's/REPLACE INTO system /REPLACE INTO `system` /g' {} \; \
+    # fix buggy mysql init command for calendar plugin - table not quoted and package name wrong \
+    && patch -p1 < /var/tmp/kolab_calendar_plugin_db.patch \
     \
     # shrink static assets \
     && npm install -g less uglify-js less-plugin-clean-css csso-cli \

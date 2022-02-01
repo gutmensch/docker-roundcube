@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 
 DOCKER_IMAGE_NAME = ''
 DOCKER_IMAGE      = ''
-DOCKER_BUILD_ARGS = '--squash --no-cache'
+DOCKER_BUILD_ARGS = '--no-cache'
 DOCKER_ARGS       = '--network=services_default'
 DOCKER_REGISTRY   = 'registry.n-os.org:5000'
 
