@@ -9,12 +9,21 @@
 # 4. Possible solution: Make all steps check for existing tables and atomic executions, produce correct
 # error output to user
 
-echo "Running MySQL database initializations and migrations."
-
-export PATH=/var/www/bin:$PATH
+set_conf() {
+    CFG=/var/www/config/config.inc.php
+    if [ ! -f $CFG ]; then
+        echo -ne "<?php\n\$config = [];\n" > $CFG
+    fi
+    echo "${1}" >> $CFG
+}
 
 cd /var/www
+export PATH=/var/www/bin:$PATH
 
+echo "Linking error log."
+ln -snf /dev/stderr /var/www/logs/errors.log
+
+echo "Running MySQL database initializations and migrations."
 while IFS=':' read -r package_name dir; do
     echo "Init MySQL schema for plugin ${package_name} and with directory ${dir}."
     if ! initdb.sh --dir=$dir --create 2>/dev/null; then
@@ -29,3 +38,16 @@ while IFS=':' read -r package_name dir; do
         echo "Update db for ${package_name} succeeded."
     fi
 done < .db_init
+
+if [ -n "${MEMCACHED_SERVER}" ]; then
+    echo "Configuring cache options using memcached."
+    set_conf "\$config['memcache_hosts'] = ['${MEMCACHED_SERVER}'];"
+    set_conf "\$config['imap_cache'] = 'memcached';"
+    set_conf "\$config['imap_cache_ttl'] = '10d';"
+    # messages cache only uses db atm - so disable, maybe enable once
+    # memcached or redis is supported
+    set_conf "\$config['messages_cache'] = false;"
+    set_conf "\$config['messages_cache_ttl'] = '10d';"
+    # 200 KiB message size
+    set_conf "\$config['messages_cache_treshold'] = 200;"
+fi

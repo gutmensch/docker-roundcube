@@ -63,6 +63,10 @@ RUN mv composer.json-dist composer.json \
     && echo "\$config['enigma_pgp_homedir'] = '/var/gpg';" >> config/defaults.inc.php \
     && echo "\$config['managesieve_conn_options'] = [ 'ssl' => [ \
       'verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true ]];" >> config/defaults.inc.php \
+    && echo "\$config['imap_conn_options'] = [ 'ssl' => [ \
+      'verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true ]];" >> config/defaults.inc.php \
+    && echo "\$config['smtp_conn_options'] = [ 'ssl' => [ \
+      'verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true ]];" >> config/defaults.inc.php \
     \
     # cleanup \
     && rm -rvf jsdeps.json bin/install-jsdeps.sh *.orig vendor/masterminds/html5/test vendor/pear/*/tests \
