@@ -81,11 +81,12 @@ COPY berlin_logo.svg skins/elastic/images/logo.svg
 #
 # ===== RUN STAGE =====
 #
+FROM registry.n-os.org:5000/root-ca:20220205 AS certs
 
 FROM registry.n-os.org:5000/php-runner:7.4
 
-ARG ROUNDCUBE_UID=2080
-ARG ROUNDCUBE_GID=2080
+ARG IMAGE_UID=2080
+ARG IMAGE_GID=2080
 
 ENV DOCUMENT_ROOT=/var/www/public_html TZ="Europe/Berlin"
 
@@ -93,6 +94,7 @@ WORKDIR ${DOCUMENT_ROOT}/..
 
 USER root
 
+COPY --from=certs /CA/certs/roundcube/ /etc/ssl/certs/roundcube/
 COPY --from=builder /var/www /var/www
 
 # for enigma support
@@ -103,13 +105,14 @@ COPY manifest /
 
 # change phpapp user id to wanted one and adjust ownership
 RUN mkdir /var/gpg \
-  && sed -i "s%phpapp:x:2000:phpapp%phpapp:x:${ROUNDCUBE_GID}:phpapp%" /etc/group \
-  && sed -i "s%phpapp:x:2000:2000:Linux User,,,:/home/phpapp:/sbin/nologin%phpapp:x:${ROUNDCUBE_UID}:${ROUNDCUBE_GID}:Linux User,,,:/home/phpapp:/sbin/nologin%" /etc/passwd \
-  && chown -R ${ROUNDCUBE_UID}:${ROUNDCUBE_GID} /run /var/log /var/run /var/lib/nginx \
-    /var/www /etc/services.d /etc/cont-init.d /var/gpg /etc/nginx /etc/php7 /etc/s6
+  && sed -i "s%phpapp:x:2000:phpapp%phpapp:x:${IMAGE_GID}:phpapp%" /etc/group \
+  && sed -i "s%phpapp:x:2000:2000:Linux User,,,:/home/phpapp:/sbin/nologin%phpapp:x:${IMAGE_UID}:${IMAGE_GID}:Linux User,,,:/home/phpapp:/sbin/nologin%" /etc/passwd \
+  && chown -R ${IMAGE_UID}:${IMAGE_GID} /run /var/log /var/run /var/lib/nginx \
+    /var/www /etc/services.d /etc/cont-init.d /var/gpg /etc/nginx /etc/php7 /etc/s6 \
+  && /etc/ssl/certs/roundcube/setup.sh $IMAGE_UID
 
 # run unprivileged
-USER phpapp
+USER $IMAGE_UID
 
 # set cookie respone from roundcube expected
 HEALTHCHECK --interval=30s --timeout=5s --retries=3  CMD curl --fail -s 127.0.0.1:8080
