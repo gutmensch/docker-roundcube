@@ -65,7 +65,7 @@ def pipeline() {
     }
 
     stage('push image') {
-        if (BRANCH_NAME == 'master') {
+        if (BRANCH_NAME == 'master' || params.KEEP_BUILD_IMAGE) {
             DOCKER_IMAGE.push()
         }
         else {
