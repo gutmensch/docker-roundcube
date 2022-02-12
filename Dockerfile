@@ -115,7 +115,7 @@ RUN mkdir /var/gpg \
 USER $IMAGE_UID
 
 # set cookie respone from roundcube expected
-HEALTHCHECK --interval=30s --timeout=5s --retries=3  CMD curl --fail -s 127.0.0.1:8080
+HEALTHCHECK --interval=30s --timeout=5s --retries=3  CMD curl --fail --cookie-jar /tmp/cookies.txt -b /tmp/cookies.txt -s http://127.0.0.1:8080 | grep -i roundcube
 
 # Keep the db in a volume for persistence
 VOLUME /var/gpg
