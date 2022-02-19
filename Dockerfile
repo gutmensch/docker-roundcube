@@ -56,7 +56,8 @@ RUN mv composer.json-dist composer.json \
     && jsshrink.sh plugins/managesieve/codemirror/lib/codemirror.js \
     \
     # configure default plugins \
-    && echo "\$config['plugins'] = ['carddav','managesieve','contextmenu','sauserprefs','enigma','swipe','ddnotes','calendar'];" >> config/defaults.inc.php \
+    #&& echo "\$config['plugins'] = ['carddav','managesieve','contextmenu','sauserprefs','enigma','swipe','ddnotes','calendar'];" >> config/defaults.inc.php \
+    && echo "\$config['plugins'] = ['carddav','managesieve','contextmenu','sauserprefs','enigma','ddnotes','swipe'];" >> config/defaults.inc.php \
     && echo "\$config['swipe_actions'] = array( \
     'messagelist' => array('left' => 'delete', 'right' => 'reply', 'down' => 'checkmail'), \
     'contactlist' => array('left' => 'delete', 'right' => 'compose', 'down' => 'none'));" >> config/defaults.inc.php \
