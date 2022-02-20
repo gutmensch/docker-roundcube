@@ -49,9 +49,9 @@ RUN mv composer.json-dist composer.json \
     # fix buggy mysql init command for calendar plugin - table not quoted and package name wrong \
     && patch -p1 < /var/tmp/kolab_calendar_plugin_db.patch \
     \
-    # fix swipe plugin issue raised with rc changes
-    # https://github.com/roundcube/roundcubemail/issues/8433
-    # https://github.com/johndoh/roundcube-swipe/issues/21
+    # fix swipe plugin issue raised with rc changes \
+    # https://github.com/roundcube/roundcubemail/issues/8433 \
+    # https://github.com/johndoh/roundcube-swipe/issues/21 \
     && patch -p1 < /var/tmp/rc_1_5_swipe_plugin_fix.patch \
     \
     && npm install -g less uglify-js less-plugin-clean-css csso-cli \
