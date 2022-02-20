@@ -3,6 +3,8 @@ FROM registry.n-os.org:5000/php:7.4 AS builder
 LABEL maintainer="Robert Schumann <rs@n-os.org>"
 
 ARG ROUNDCUBE_VERSION=1.5.2-git
+ARG DEBUG
+ARG COMMIT
 
 WORKDIR /var/www
 
@@ -13,11 +15,15 @@ COPY patches /var/tmp
 
 # checkout roundcube source
 RUN bash -c "export VERSION=release-${ROUNDCUBE_VERSION%.*} \
+    && echo Checking out \$VERSION \
     && rm -rf * \
-    && git clone --branch \${VERSION} --depth 1 https://github.com/roundcube/roundcubemail.git . \
+    && git clone --branch \${VERSION} $(test -z \"${COMMIT}\" && echo -n \"--depth 1\") https://github.com/roundcube/roundcubemail.git . \
+    && ( test -n \"${COMMIT}\" && git reset --hard ${COMMIT} || true ) \
     && rm -rf .git installer skins/{classic,larry}"
 
-ENV PATH=/usr/local/bin:/bin:/usr/bin:/var/www/bin STYLES=skins/elastic/styles SKIP_DB_INIT=1
+ENV PATH=/usr/local/bin:/bin:/usr/bin:/var/www/bin \
+    STYLES=skins/elastic/styles \
+    SKIP_DB_INIT=1
 
 # install dependencies via composer
 RUN mv composer.json-dist composer.json \
@@ -43,9 +49,16 @@ RUN mv composer.json-dist composer.json \
     # fix buggy mysql init command for calendar plugin - table not quoted and package name wrong \
     && patch -p1 < /var/tmp/kolab_calendar_plugin_db.patch \
     \
-    # shrink static assets \
+    # fix swipe plugin issue raised with rc changes
+    # https://github.com/roundcube/roundcubemail/issues/8433
+    # https://github.com/johndoh/roundcube-swipe/issues/21
+    && patch -p1 < rc_1_5_swipe_plugin_fix.patch \
+    \
     && npm install -g less uglify-js less-plugin-clean-css csso-cli \
-    && jsshrink.sh \
+    \
+    # shrink static assets if no debug image \
+    && if [ -z "${DEBUG}" ]; then \
+    jsshrink.sh \
     && updatecss.sh \
     && cssshrink.sh \
     && lessc --clean-css="--s1 --advanced" $STYLES/styles.less > $STYLES/styles.min.css \
@@ -53,11 +66,17 @@ RUN mv composer.json-dist composer.json \
     && lessc --clean-css="--s1 --advanced" $STYLES/embed.less > $STYLES/embed.min.css \
     && install-jsdeps.sh \
     && jsshrink.sh program/js/publickey.js \
-    && jsshrink.sh plugins/managesieve/codemirror/lib/codemirror.js \
+    && jsshrink.sh plugins/managesieve/codemirror/lib/codemirror.js; else \
+    \
+    # do not shrink otherwise \
+    updatecss.sh \
+    && lessc $STYLES/styles.less > $STYLES/styles.min.css \
+    && lessc $STYLES/print.less > $STYLES/print.min.css \
+    && lessc $STYLES/embed.less > $STYLES/embed.min.css \
+    && install-jsdeps.sh ; fi \
     \
     # configure default plugins \
-    #&& echo "\$config['plugins'] = ['carddav','managesieve','contextmenu','sauserprefs','enigma','swipe','ddnotes','calendar'];" >> config/defaults.inc.php \
-    && echo "\$config['plugins'] = ['carddav','managesieve','contextmenu','sauserprefs','enigma','ddnotes','swipe'];" >> config/defaults.inc.php \
+    && echo "\$config['plugins'] = ['carddav','managesieve','contextmenu','sauserprefs','enigma','ddnotes', 'calendar', 'swipe'];" >> config/defaults.inc.php \
     && echo "\$config['swipe_actions'] = array( \
     'messagelist' => array('left' => 'delete', 'right' => 'reply', 'down' => 'checkmail'), \
     'contactlist' => array('left' => 'delete', 'right' => 'compose', 'down' => 'none'));" >> config/defaults.inc.php \
