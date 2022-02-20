@@ -1,5 +1,5 @@
---- /tmp/skins/elastic/styles/widgets/lists.less.old	2022-02-20 12:53:36.000000000 +0100
-+++ /tmp/skins/elastic/styles/widgets/lists.less.new	2022-02-20 12:54:20.000000000 +0100
+--- a/skins/elastic/styles/widgets/lists.less	2022-02-20 12:53:36.000000000 +0100
++++ b/skins/elastic/styles/widgets/lists.less	2022-02-20 12:54:20.000000000 +0100
 @@ -794,7 +794,6 @@ html.touch {
      .messagelist {
          tr {
