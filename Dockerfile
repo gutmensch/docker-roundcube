@@ -52,7 +52,7 @@ RUN mv composer.json-dist composer.json \
     # fix swipe plugin issue raised with rc changes
     # https://github.com/roundcube/roundcubemail/issues/8433
     # https://github.com/johndoh/roundcube-swipe/issues/21
-    && patch -p1 < rc_1_5_swipe_plugin_fix.patch \
+    && patch -p1 < /var/tmp/rc_1_5_swipe_plugin_fix.patch \
     \
     && npm install -g less uglify-js less-plugin-clean-css csso-cli \
     \
