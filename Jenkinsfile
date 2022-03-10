@@ -4,14 +4,18 @@ import java.text.SimpleDateFormat
 
 DOCKER_IMAGE_NAME = ''
 DOCKER_IMAGE      = ''
+DOCKER_BUILD_ARGS = '--no-cache'
 DOCKER_ARGS       = '--network=services_default'
 DOCKER_REGISTRY   = 'registry.n-os.org:5000'
 
 
 properties([
+    disableConcurrentBuilds(),
     parameters([
         booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Do you want to run the build with tests?'),
-        booleanParam(name: 'KEEP_BUILD_IMAGE', defaultValue: false, description: 'Do you want to keep the docker image built on PR or branch?')
+        booleanParam(name: 'KEEP_BUILD_IMAGE', defaultValue: false, description: 'Do you want to keep the docker image built on PR or branch?'),
+        stringParam(name: 'DEBUG', defaultValue: '', description: 'Do not minify frontend assets?'),
+        stringParam(name: 'COMMIT', defaultValue: '', description: 'Build specific commit from branch?'),
     ])
 ])
 
@@ -48,7 +52,14 @@ def pipeline() {
     // https://docs.cloudbees.com/docs/admin-resources/latest/plugins/docker-workflow
     stage('build image') {
         DOCKER_IMAGE_NAME = "${DOCKER_REGISTRY}/${getDockerImage()}:${getDockerTag()}"
-        DOCKER_IMAGE = docker.build(DOCKER_IMAGE_NAME, "--no-cache ${DOCKER_ARGS} .")
+	ARGS = "${DOCKER_BUILD_ARGS}"
+	if (params.DEBUG?.trim()) {
+	    ARGS = "${ARGS} --build-arg DEBUG=${params.DEBUG}"
+	}
+	if (params.COMMIT?.trim()) {
+	    ARGS = "${ARGS} --build-arg COMMIT=${params.COMMIT}"
+	}
+        DOCKER_IMAGE = docker.build(DOCKER_IMAGE_NAME, "${ARGS} ${DOCKER_ARGS} .")
     }
 
     stage('run tests') {
@@ -63,7 +74,7 @@ def pipeline() {
     }
 
     stage('push image') {
-        if (BRANCH_NAME == 'master') {
+        if (BRANCH_NAME == 'master' || params.KEEP_BUILD_IMAGE) {
             DOCKER_IMAGE.push()
         }
         else {
@@ -72,7 +83,7 @@ def pipeline() {
     }
 
     stage('delete image') {
-        if (BRANCH_NAME == 'master' || KEEP_BUILD_IMAGE) {
+        if (BRANCH_NAME == 'master' || params.KEEP_BUILD_IMAGE) {
             Utils.markStageSkippedForConditional('delete image')
         }
         else {
@@ -115,7 +126,6 @@ String getDockerTag() {
 
 void setBuildStatus(message, state) {
   def repoUrl = sh(script: 'git config --get remote.origin.url', returnStdout: true).trim()
-  echo repoUrl
   step([
       $class: "GitHubCommitStatusSetter",
       reposSource: [$class: "ManuallyEnteredRepositorySource", url: repoUrl],
